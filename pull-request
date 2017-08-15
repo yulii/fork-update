@@ -11,7 +11,7 @@ test -z "$(git status -s ${UPDATE_LOCK_FILE} 2> /dev/null)" && echo 'No update.'
 if [ -n "$(git ls-remote origin ${BRANCH} 2> /dev/null)" ]; then
   echo 'Already committed.'
 else
-  git add ${UPDATE_LOCK_FILE}
+  git add ${UPDATE_LOCK_FILE} ${UPDATE_DEPENDENCY_FILES}
   git commit -m 'Auto update'
   git branch -M ${BRANCH}
   git push origin ${BRANCH}
