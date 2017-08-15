@@ -1,0 +1,10 @@
+#!/bin/sh
+
+ORIGINAL_REPO="${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+FORK_REPO="${FORK_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+
+git clone -b master --depth 1 https://${FORK_REPO_TOKEN}@github.com/${FORK_REPO}.git .
+git remote add upstream https://github.com/${ORIGINAL_REPO}.git
+git fetch upstream
+git checkout master
+git merge upstream/master

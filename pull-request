@@ -1,0 +1,25 @@
+#!/bin/sh
+
+ORIGINAL_REPO="${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+FORK_REPO="${FORK_USERNAME}/${CIRCLE_PROJECT_REPONAME}"
+
+BRANCH="update-$(sha1sum ${UPDATE_LOCK_FILE} | cut -d' ' -f1)"
+
+test -z "$(git status -s ${UPDATE_LOCK_FILE} 2> /dev/null)" && echo 'No update.'         && exit 0
+test -n "$(git ls-remote origin ${BRANCH} 2> /dev/null)"    && echo 'Already committed.' && exit 0
+git add ${UPDATE_LOCK_FILE}
+git commit -m 'Auto update'
+git branch -M ${BRANCH}
+git push origin ${BRANCH}
+
+test -z "$(git ls-remote origin ${BRANCH} 2> /dev/null)"    && echo 'Update branch not found.' && exit 0
+git fetch origin ${BRANCH}
+test -z "$(git diff upstream/master...FETCH_HEAD)"          && echo 'No changes.' && exit 0
+
+curl -s -X POST \
+     -H "Authorization: token ${FORK_REPO_TOKEN}" \
+     -H "Content-Type: application/json" \
+     -d "{ \"title\": \"Update packages\", \"body\": \"Auto update pull request!\", \"head\": \"${FORK_USERNAME}:${BRANCH}\", \"base\": \"master\" }" \
+     "https://api.github.com/repos/${ORIGINAL_REPO}/pulls" \
+     | tee /tmp/create-pull-request.log.json
+test -n "$(cat /tmp/create-pull-request.log.json | jq -r 'select(.errors == null)')"
