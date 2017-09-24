@@ -13,8 +13,8 @@ if [ -n "$(git ls-remote origin ${BRANCH} 2> /dev/null)" ]; then
 else
   git config --local user.email "${GIT_USER_EMAIL:-yone.info@gmail.com}"
   git config --local user.name "${GIT_USER_NAME:-yulii}"
-  git add ${UPDATE_LOCK_FILE} ${UPDATE_DEPENDENCY_FILES}
-  git commit -m 'Auto update'
+  git add ${UPDATE_LOCK_FILE} ${UPDATE_DEPENDENCY_FILES:-}
+  git commit -m 'Auto update packages'
   git branch -M ${BRANCH}
   git push origin ${BRANCH}
 fi
